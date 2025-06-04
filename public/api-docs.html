@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentația API - Nightscout API Backend</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/docs.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📖 Documentația API</h1>
+            <p>Ghid complet pentru API-ul compatibil cu Nightscout</p>
+            <nav class="header-nav">
+                <a href="/" class="nav-link">← Înapoi la Tabloul de Bord</a>
+            </nav>
+        </header>
+
+        <!-- Quick Navigation -->
+        <div class="section">
+            <div class="quick-nav">
+                <h3>Navigare Rapidă</h3>
+                <div class="nav-grid">
+                    <a href="#authentication" class="nav-item">🔐 Autentificare</a>
+                    <a href="#entries" class="nav-item">📊 Înregistrări CGM</a>
+                    <a href="#treatments" class="nav-item">💊 Tratamente</a>
+                    <a href="#status" class="nav-item">⚙️ Starea Sistemului</a>
+                    <a href="#examples" class="nav-item">💡 Exemple</a>
+                    <a href="#errors" class="nav-item">⚠️ Gestionarea Erorilor</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Base URL -->
+        <div class="section">
+            <h2>🌐 URL de Bază</h2>
+            <div class="code-block">
+                <code id="base-url">https://your-domain.com/api/v1</code>
+                <button onclick="copyToClipboard('base-url')" class="copy-btn">Copiază</button>
+            </div>
+            <p class="help-text">Înlocuiește <code>your-domain.com</code> cu domeniul tău real sau <code>localhost:3000</code> pentru dezvoltare.</p>
+        </div>
+
+        <!-- Authentication -->
+        <div class="section" id="authentication">
+            <h2>🔐 Authentication</h2>
+            <p>The API supports multiple authentication methods for maximum compatibility with Nightscout apps:</p>
+            
+            <div class="auth-method">
+                <h4>Method 1: API Secret Header</h4>
+                <div class="code-block">
+                    <code>curl -H "api-secret: your_api_secret_here" \
+     https://your-domain.com/api/v1/entries</code>
+                </div>
+            </div>
+
+            <div class="auth-method">
+                <h4>Method 2: JWT Bearer Token</h4>
+                <div class="code-block">
+                    <code>curl -H "Authorization: Bearer your_jwt_token" \
+     https://your-domain.com/api/v1/entries</code>
+                </div>
+            </div>
+
+            <div class="auth-method">
+                <h4>Method 3: Token Query Parameter</h4>
+                <div class="code-block">
+                    <code>curl "https://your-domain.com/api/v1/entries?token=your_api_secret"</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- CGM Entries -->
+        <div class="section" id="entries">
+            <h2>📊 CGM Entries</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="path">/api/v1/entries[.json]</span>
+                </div>
+                <p>Retrieve CGM glucose entries with optional filtering.</p>
+                
+                <h4>Query Parameters:</h4>
+                <div class="params-table">
+                    <div class="param-row">
+                        <span class="param-name">count</span>
+                        <span class="param-type">number</span>
+                        <span class="param-desc">Number of entries to return (default: 10, max: 1000)</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-name">find[field][operator]</span>
+                        <span class="param-type">string</span>
+                        <span class="param-desc">MongoDB-style query filters</span>
+                    </div>
+                </div>
+
+                <h4>Example Response:</h4>
+                <div class="code-block">
+                    <code>[
+  {
+    "_id": "uuid-here",
+    "type": "sgv",
+    "dateString": "2024-01-01T12:00:00.000Z",
+    "date": 1704110400000,
+    "sgv": 120,
+    "direction": "Flat",
+    "noise": 1
+  }
+]</code>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="path">/api/v1/entries[.json]</span>
+                </div>
+                <p>Upload new CGM entries.</p>
+                
+                <h4>Request Body:</h4>
+                <div class="code-block">
+                    <code>[
+  {
+    "type": "sgv",
+    "dateString": "2024-01-01T12:00:00.000Z",
+    "sgv": 120,
+    "direction": "Flat",
+    "noise": 1
+  }
+]</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Treatments -->
+        <div class="section" id="treatments">
+            <h2>💊 Treatments</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="path">/api/v1/treatments[.json]</span>
+                </div>
+                <p>Retrieve treatment records (insulin, carbs, etc.).</p>
+                
+                <h4>Example Response:</h4>
+                <div class="code-block">
+                    <code>[
+  {
+    "_id": "uuid-here",
+    "eventType": "Meal Bolus",
+    "created_at": "2024-01-01T12:00:00.000Z",
+    "glucose": 120,
+    "carbs": 45,
+    "insulin": 3.5,
+    "notes": "Lunch"
+  }
+]</code>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="path">/api/v1/treatments[.json]</span>
+                </div>
+                <p>Upload new treatment records.</p>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="section" id="status">
+            <h2>⚙️ System Status</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="path">/api/v1/status[.json]</span>
+                </div>
+                <p>Get server status and configuration information.</p>
+                
+                <h4>Example Response:</h4>
+                <div class="code-block">
+                    <code>{
+  "apiEnabled": true,
+  "name": "nightscout-api-backend",
+  "version": "1.0.0",
+  "settings": {
+    "units": "mg/dl",
+    "timeFormat": 12,
+    "theme": "default"
+  }
+}</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examples -->
+        <div class="section" id="examples">
+            <h2>💡 Common Examples</h2>
+            
+            <div class="example">
+                <h4>Get last 100 entries</h4>
+                <div class="code-block">
+                    <code>GET /api/v1/entries?count=100</code>
+                </div>
+            </div>
+
+            <div class="example">
+                <h4>Get entries from specific date</h4>
+                <div class="code-block">
+                    <code>GET /api/v1/entries?find[dateString][$gte]=2024-01-01</code>
+                </div>
+            </div>
+
+            <div class="example">
+                <h4>Get high glucose readings</h4>
+                <div class="code-block">
+                    <code>GET /api/v1/entries?find[sgv][$gte]=180</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Handling -->
+        <div class="section" id="errors">
+            <h2>⚠️ Error Handling</h2>
+            <p>All endpoints return consistent error responses:</p>
+            
+            <div class="code-block">
+                <code>{
+  "error": "Error Type",
+  "message": "Detailed error message"
+}</code>
+            </div>
+
+            <div class="status-codes">
+                <h4>HTTP Status Codes:</h4>
+                <div class="status-grid">
+                    <div class="status-item success">
+                        <span class="code">200</span>
+                        <span class="desc">Success</span>
+                    </div>
+                    <div class="status-item error">
+                        <span class="code">400</span>
+                        <span class="desc">Bad Request</span>
+                    </div>
+                    <div class="status-item error">
+                        <span class="code">401</span>
+                        <span class="desc">Unauthorized</span>
+                    </div>
+                    <div class="status-item error">
+                        <span class="code">404</span>
+                        <span class="desc">Not Found</span>
+                    </div>
+                    <div class="status-item error">
+                        <span class="code">500</span>
+                        <span class="desc">Server Error</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive API Tester -->
+        <div class="section">
+            <h2>🧪 API Tester</h2>
+            <div class="api-tester">
+                <div class="tester-form">
+                    <div class="form-group">
+                        <label>Endpoint:</label>
+                        <select id="endpoint-select">
+                            <option value="/api/v1/status">GET /api/v1/status</option>
+                            <option value="/api/v1/entries?count=5">GET /api/v1/entries (last 5)</option>
+                            <option value="/api/v1/treatments?count=5">GET /api/v1/treatments (last 5)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>API Secret (optional):</label>
+                        <input type="password" id="api-secret-input" placeholder="Enter your API secret">
+                    </div>
+                    <button onclick="testEndpoint()" class="btn btn-primary">Test Endpoint</button>
+                </div>
+                <div class="tester-result">
+                    <h4>Response:</h4>
+                    <div class="code-block">
+                        <pre id="test-result">Click "Test Endpoint" to see the response</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Nightscout API Backend - Documentația Completă API</p>
+        <p><a href="/">Tablou de Bord</a> | <a href="https://github.com/nightscout/cgm-remote-monitor">Proiectul Nightscout</a></p>
+    </footer>
+
+    <script src="/js/docs.js"></script>
+</body>
+</html>

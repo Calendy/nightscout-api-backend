@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nightscout API Backend - Tablou de Bord</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🩸 Diabase Sync</h1>
+            <p>Gestionarea Centralizată a Datelor CGM</p>
+        </header>
+
+        <!-- Login/Register Section -->
+        <div id="auth-section" class="section">
+            <div class="auth-tabs">
+                <button id="login-tab" class="tab-button active" onclick="showLogin()">Autentificare</button>
+                <button id="register-tab" class="tab-button" onclick="showRegister()">Înregistrare</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <h2>Autentificare</h2>
+                <form onsubmit="login(event)">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Parolă:</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Autentificare</button>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" class="auth-form" style="display: none;">
+                <h2>Înregistrare</h2>
+                <form onsubmit="register(event)">
+                    <div class="form-group">
+                        <label for="register-email">Email:</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Parolă:</label>
+                        <input type="password" id="register-password" minlength="6" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Înregistrare</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section" style="display: none;">
+            <div class="dashboard-header">
+                <h2>Bun venit, <span id="user-email"></span>!</h2>
+                <button onclick="logout()" class="btn btn-secondary">Deconectare</button>
+            </div>
+
+            <!-- API Configuration -->
+            <div class="card">
+                <h3>🔗 URL Nightscout</h3>
+                <div class="url-display">
+                    <input type="text" id="nightscout-url" readonly>
+                    <button onclick="copyUrl()" class="btn btn-small">Copiază</button>
+                </div>
+                <p class="help-text">Folosește acest URL în xDrip+, Loop, Nightguard și alte aplicații compatibile cu Nightscout.</p>
+            </div>
+
+            <!-- API Secret -->
+            <div class="card">
+                <h3>🔑 API Token Secret</h3>
+                <div class="secret-display">
+                    <input type="password" id="api-secret" readonly>
+                    <button onclick="toggleSecretVisibility()" class="btn btn-small" id="toggle-secret">Afișează</button>
+                    <button onclick="copySecret()" class="btn btn-small">Copiază</button>
+                </div>
+
+                <h4 style="margin-top: 24px; color: #cccccc; font-size: 1rem;">🔐 API Secret Header (SHA-1)</h4>
+                <div class="secret-display">
+                    <input type="password" id="api-secret-sha1" readonly>
+                    <button onclick="toggleSha1Visibility()" class="btn btn-small" id="toggle-sha1">Afișează</button>
+                    <button onclick="copySha1()" class="btn btn-small">Copiază</button>
+                </div>
+
+                <button onclick="regenerateSecret()" class="btn btn-warning">Regenerează Cheia</button>
+                <p class="help-text">
+                    <strong>Cheia API:</strong> Folosește-o în câmpul "API Secret" din aplicațiile tale.<br>
+                    <strong>SHA-1 Hash:</strong> Aceasta este valoarea pe care xDrip+ o trimite efectiv la server.
+                </p>
+            </div>
+
+            <!-- Quick Setup Guide -->
+            <div class="card">
+                <h3>📱 Ghid de Configurare Rapidă</h3>
+                <div class="setup-guide">
+                    <h4>Configurare xDrip+:</h4>
+                    <ol>
+                        <li>Mergi la Setări → Incarcare in Cloud → Incarcare API (REST)</li>
+                        <li>Setează - Adresa URL de baza cu: <code id="base-url-display"></code></li>
+                    </ol>
+                    <h4>Configurare Diabase:</h4>
+                    <ol>
+                        <li>Mergi la Setări → Nightscout</li>
+                        <li>Setează - URL Nightscout cu: https://sync.diabase.ro</li>
+                        <li>Setează - Cheia API cu: API Token Secret</li>
+                    </ol>
+                 
+                </div>
+            </div>
+
+            <!-- Data Statistics -->
+            <div class="card">
+                <h3>📊 Prezentare Generală Date</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Înregistrări CGM:</span>
+                        <span class="stat-value" id="entries-count">Se încarcă...</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Tratamente:</span>
+                        <span class="stat-value" id="treatments-count">Se încarcă...</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Ultima Înregistrare:</span>
+                        <span class="stat-value" id="last-entry">Se încarcă...</span>
+                    </div>
+                </div>
+
+                <!-- Recent CGM Entries -->
+                <div class="recent-entries-section">
+                    <h4>🩸 Ultimele 10 Înregistrări CGM</h4>
+                    <div class="auto-refresh-controls">
+                        <span class="refresh-status active" id="refresh-status">🔄 Actualizare automată activă (30s)</span>
+                        <button onclick="manualRefresh()" class="btn btn-refresh">Actualizează Acum</button>
+                        <button onclick="toggleAutoRefresh()" class="btn btn-refresh" id="toggle-refresh-btn">Oprește Auto-refresh</button>
+                    </div>
+                    <div id="recent-entries-container">
+                        <div class="loading-message">Se încarcă înregistrările...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <footer>
+        <p>Diabase Sync - Gestionarea Centralizată a Datelor CGM</p>
+        <p><a href="/api-docs">Documentația API</a></p>
+    </footer>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

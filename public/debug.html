@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Nightscout API Backend</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .tab-button { padding: 10px 20px; margin: 5px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; }
+        .tab-button.active { background: #007bff; color: white; }
+        .auth-form { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        .form-group { margin: 10px 0; }
+        .form-group input { width: 100%; padding: 8px; margin: 5px 0; }
+        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🩸 Nightscout API Backend - Debug</h1>
+    
+    <div class="auth-tabs">
+        <button id="login-tab" class="tab-button active" onclick="showLogin()">Login</button>
+        <button id="register-tab" class="tab-button" onclick="showRegister()">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="auth-form">
+        <h2>Login</h2>
+        <form onsubmit="testLogin(event)">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="login-email" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" class="auth-form" style="display: none;">
+        <h2>Register</h2>
+        <form onsubmit="testRegister(event)">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="register-email" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="register-password" minlength="6" required>
+            </div>
+            <button type="submit" class="btn">Register</button>
+        </form>
+    </div>
+
+    <div id="message" style="margin: 20px 0; padding: 10px; display: none;"></div>
+
+    <script>
+        console.log('Debug script loaded');
+
+        function showLogin() {
+            console.log('showLogin called');
+            document.getElementById('login-tab').classList.add('active');
+            document.getElementById('register-tab').classList.remove('active');
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+        }
+
+        function showRegister() {
+            console.log('showRegister called');
+            document.getElementById('register-tab').classList.add('active');
+            document.getElementById('login-tab').classList.remove('active');
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('login-form').style.display = 'none';
+        }
+
+        function testLogin(event) {
+            event.preventDefault();
+            console.log('Login form submitted');
+            showMessage('Login test - form submitted!', 'info');
+        }
+
+        function testRegister(event) {
+            event.preventDefault();
+            console.log('Register form submitted');
+            showMessage('Register test - form submitted!', 'info');
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.background = type === 'error' ? '#ffebee' : '#e3f2fd';
+            messageDiv.style.color = type === 'error' ? '#c62828' : '#1565c0';
+            messageDiv.style.border = '1px solid ' + (type === 'error' ? '#c62828' : '#1565c0');
+        }
+
+        // Test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            showMessage('Debug page loaded successfully!', 'info');
+        });
+    </script>
+</body>
+</html>
